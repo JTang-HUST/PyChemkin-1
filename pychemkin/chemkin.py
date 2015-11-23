@@ -661,6 +661,41 @@ def getMoleFraction(ckcsvFile, species=[]):
     else:
         return
 
+def getLumpedMoleFraction(ckcsvFile, lumped_species_dict={}):
+    """
+    This method is trying to aggregate MoleFraction for lumped species
+    the input variable `lumped_species_dict`: 
+        key is name by user e.g., Undecene, 
+        value is a list of all the lumped species, 
+        e.g., ['C=CCCCCCCCCC','CC=CCCCCCCCC','CCC=CCCCCCCC','CCCC=CCCCCCC','CCCCC=CCCCCC']
+    The output is same as getMoleFraction() except that the keys of lumpedSpecData are 
+    the keys of lumped_species_dict
+    """
+    species_list = []
+    for lumped_key in lumped_species_dict:
+        lumped_species = lumped_species_dict[lumped_key] 
+        if not isinstance(lumped_species, list):
+            lumped_species = [lumped_species]
+        species_list.extend(lumped_species)
+
+    leadData, specData = getMoleFraction(ckcsvFile, species_list)
+
+    lumpedSpecData = {}
+
+    for lumped_key in lumped_species_dict:
+        lumped_species = lumped_species_dict[lumped_key]
+        if not isinstance(lumped_species, list):
+            lumpedSpecData[lumped_key] = specData[lumped_species]
+        else:
+            molfrac_sum = specData[lumped_species[0]]
+            for spc in lumped_species[1:]:
+                molfrac_spc = specData[spc]
+                sln_num = len(molfrac_spc)
+                for sln in range(sln_num):
+                    molfrac_sum[sln] = numpy.add(molfrac_sum[sln], molfrac_spc[sln])
+            lumpedSpecData[lumped_key] = molfrac_sum
+    return leadData, lumpedSpecData
+
 def getTotalMoles(ckcsvFile):
     """
     Return the time and total moles data from the given CKCSV file.  
