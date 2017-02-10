@@ -184,7 +184,8 @@ class ChemkinJob(object):
     def writeInputHomogeneousBatch(self,problemType, reactants, temperature, pressure, endTime, 
                       Continuations=False, typeContinuation = None, Tlist = [], Plist = [],
                       variableVolume=False, variableVolumeProfile = None, 
-                      solverTimeStepProfile = None, sensitivity=[], rop=[]):
+                      solverTimeStepProfile = None, sensitivity=[], rop=[],
+                      atol=1e-20, rtol=1e-8):
         """
         Write input file for homogeneous batch reactor
         """
@@ -260,10 +261,10 @@ VPRO {0:g} {1:g}   ! Volume (cm3)""".format(time,vol))
 ADAP   ! Save Additional Adaptive Points
 ASTEPS 20   ! Use Solver Integration Steps
 ATLS 1.0E-6   ! Sensitivity Absolute Tolerance
-ATOL 1.0E-20   ! Absolute Tolerance
+ATOL {0}   ! Absolute Tolerance
 MAXIT 4   ! Maximum Number of Iterations
 RTLS 0.0001   ! Sensitivity Relative Tolerance
-RTOL 1.0E-8   ! Relative Tolerance""")
+RTOL {1}   ! Relative Tolerance""".format(atol, rtol))
         
         if solverTimeStepProfile:
             with open(solverTimeStepProfile, 'rb') as csvfile2:
@@ -321,7 +322,8 @@ PRES {1:g}""".format(typeContinuation,numpy.array(Plist)[i]/1.01325))
     def writeInputPlugFlow(self,problemType, reactants, 
                            startingAxialPosition, endingAxialPosition, diameter, momentum=True, massflowrate = None, sccmflowrate = None, 
                            temperature  = None, pressure  = None,  
-                           temperatureProfile = None, pressureProfile = None, sensitivity=[], rop=[]):
+                           temperatureProfile = None, pressureProfile = None, sensitivity=[], rop=[],
+                           atol=1e-9, rtol=1e-6):
     
         """
         Write input file for typical plug flow
@@ -427,14 +429,14 @@ VIS 0.0   ! Mixture Viscosity at Inlet (g/cm-sec)
 ACHG 0.0   ! Maximum Absolute Change in Site Fractions
 ADAP   ! Save Additional Adaptive Points
 ATLS 1.0E-6   ! Sensitivity Absolute Tolerance
-ATOL 1.0E-9   ! Absolute Tolerance
+ATOL {0}  ! Absolute Tolerance
 MAXIT 4   ! Maximum Number of Iterations
 NNEG   ! Force Non-negative Solution
 PSV 1.0E-8   ! Scaling Factor for Relaxing Surface Equations (cm/sec)
 RCHG 1.0E-6   ! Maximum Relative Change in Site Fractions
 RTLS 0.0001   ! Sensitivity Relative Tolerance
-RTOL 1.0E-6   ! Relative Tolerance
-TSTP 1.0   ! Initial Integration Step (cm""")          
+RTOL {1}   ! Relative Tolerance
+TSTP 1.0   ! Initial Integration Step (cm""".format(atol, rtol))          
 
         input_stream+=("""
 ! 
