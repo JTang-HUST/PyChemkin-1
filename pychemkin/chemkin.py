@@ -640,21 +640,22 @@ def getMoleFraction(ckcsvFile, species=[]):
         for row in reader:
             label = row[0].strip()
             tokens = label.split('_')
-            if tokens[0] == 'Time':
+            if label.startswith('Time'):
                 tdata = numpy.array([float(r) for r in row[2:]], numpy.float)
                 tunits = row[1].strip()[1:-1].lower()
                 tdata *= {'sec': 1.0, 'min': 60., 'hr': 3600., 'msec': 1e-3, 'microsec': 1e-6}[tunits]
                 timeData.append(tdata)
             
-            if tokens[0] == 'Distance':      
+            if label.startswith('Distance'):      
                 ddata = numpy.array([float(r) for r in row[2:]], numpy.float)
                 dunits = row[1].strip()[1:-1].lower()
                 ddata *= {'cm': 1.0, 'mm': 0.1, 'm': 100.}[dunits]
                 distanceData.append(ddata)
 
-            if label.startswith('Mole_fraction'):
+            if label.startswith('Mole_fraction_'):
+                species_label = label[14:]
                 for spec in species:
-                    if tokens[2] == spec:
+                    if species_label == spec:
                         specData[spec].append(numpy.array([float(r) for r in row[2:]], numpy.float))
     if timeData:
         return timeData, specData
